@@ -11,5 +11,6 @@ setup(
     url='https://github.com/mclaffey/dfx',
     author='Mike Claffey',
     author_email='mpclaffey@gmail.com',
-    include_package_data=True
+    include_package_data=True,
+    scripts = ['bin/dfx'],
 )

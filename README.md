@@ -11,5 +11,7 @@ or
 
 ## RUN
 
-`export FLASK_APP=dfx.web
-flask run`
+```
+export FLASK_APP=dfx.web
+flask run
+```
