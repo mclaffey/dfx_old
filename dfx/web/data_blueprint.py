@@ -19,12 +19,12 @@ def populate_data_df(endpoint, values):
     g._dataframe = pd.read_pickle(df_pickle_path(g._data_name))
 
 def df_pickle_path(data_alias, sub_directory=""):
-    return os.path.join(os.getcwd(), 'instance', 'df', sub_directory, "{}.pickle".format(data_alias))
+    return os.path.join(os.getcwd(), '.dfx_data', 'df', sub_directory, "{}.pickle".format(data_alias))
 
 def instance_path(rel_path):
     """Append rel_path to the application's instance folder
     """
-    return os.path.join(os.getcwd(), 'instance', rel_path)
+    return os.path.join(os.getcwd(), '.dfx_data', rel_path)
 
 def url_for_data(data_method_name, **kwargs):
 	"""Convenience function for url_for within data_blueprint
