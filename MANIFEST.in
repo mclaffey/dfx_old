@@ -1,3 +1,4 @@
 include dfx/templates/*
 include dfx/web/templates/*
-recursive-include dfx/web/static/*
+include dfx/web/static/*
+include dfx/web/static/includes/*
