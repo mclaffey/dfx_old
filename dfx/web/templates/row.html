@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Column{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+
+<h1>Row {{row_num}}</h1>
+
+{{ describer.html | safe }}
+
+{% endblock %}

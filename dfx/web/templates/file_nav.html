@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Files{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+
+<h1>Data file selection</h1>
+
+<span style="color: red;">{{ message }}</span>
+
+<ul>
+{% for file_name, file_url in files %}
+	<li>
+		{% if file_url %}
+			<a href="{{file_url}}">{{ file_name }}</a> 
+		{% else %}
+			{{ file_name }}
+		{% endif %}
+	</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

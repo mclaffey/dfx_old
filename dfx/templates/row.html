@@ -1,0 +1,16 @@
+<table border='1' class='dfx-table'>
+  <thead>
+    <tr>
+      <th>Column</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for col_name, val in describer.row_series.iteritems() %}
+    <tr>
+      <td>{{ describer.urls.column(col_name) }}</td>
+      <td>{{ val }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

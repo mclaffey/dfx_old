@@ -1,0 +1,37 @@
+<h1>Table</h1>
+
+<h2>Basics</h2>
+
+<ul>
+	{% for b in describer._basics %}
+	<li>{{ b }}</li>
+	{% endfor %}
+</ul>
+
+<h2>Sample Rows</h2>
+
+{{ describer._sample_df_html }}
+
+<h2>Columns</h2>
+
+<ul>
+	{% for col in describer._column_descriptions %}
+	<li>{{ col[0] }} - {{ ". ".join(col[1]) }}</li>
+	{% endfor %}
+</ul>
+
+<h2>Relationships</h2>
+
+<ul>
+  {% for rel in describer._relationships %}
+  {% if rel[1] %}
+  <li>{{ rel[0] }}
+  	<ul>
+  		{% for col in rel[1] %}
+  		<li>{{ col[0] }} - {{ col[1] }}</li>
+  		{% endfor %}
+  	</ul>
+  </li> 
+  {% endif %}
+  {% endfor %}
+</ul>

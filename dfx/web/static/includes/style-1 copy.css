@@ -1,0 +1,399 @@
+/* Color palette
+http://www.dtelepathy.com/blog/inspiration/beautiful-color-palettes-for-your-next-web-project
+45. Scott McCarthy Design
+	color:			rgb(215, 92, 55);	/* autumn orange
+	color:			rgb(103, 114, 122); /* gray
+	color:			rgb(105, 145, 172); /* metallic blue
+	color:			rgb(195, 215, 223); /* light blue
+	color:			rgb(245, 245, 245); /* near white
+*/
+
+
+/* ***********************************************************************************************
+   Page Layout
+ */
+
+html {
+	/* Horizontally center the content */
+	max-width: 		1000px;
+	margin-left: 	auto;
+	margin-right: 	auto;
+}
+
+body
+{
+	margin:			0px;
+}
+
+* {
+	/* Use Helvetica by default */
+	font-family: 	Helvetica, Arial, sans-serif;
+	font-size:		16;
+	line-height: 	1.5;
+	color:			rgb(65, 65, 65); /* gray */
+}
+
+/* ***********************************************************************************************
+   Headings
+ */
+
+
+h1,h2,h3,h4,h5,h6 {
+	clear: 			both;               /* Make sure headings always clear to a new line */
+	margin-top:		4px;
+	margin-bottom:	4px;
+}
+
+h1
+{
+	font-size:		32px;
+	letter-spacing:	-1px;
+}
+
+h2
+{
+	font-size:		24px;
+	letter-spacing:	-1px;
+}
+
+/* ***********************************************************************************************
+   Main text formatting
+ */
+
+pre
+{
+    display:		block;
+    font-family:	monospace;
+}
+
+a
+{
+	color: 				DarkBlue;
+	font-weight:		bold;
+	text-decoration: 	none;
+}
+
+a:hover {
+	text-decoration: 	underline;
+}
+
+a:visited
+{
+	color:				Purple;
+}
+
+.centered
+{
+	margin-left:	auto;
+	margin-right:	auto;
+	text-align: 	center;
+}
+
+
+/* ***********************************************************************************************
+   Forms
+ */
+
+
+form
+{	
+}
+
+
+input[type=submit]
+{
+	/*
+	Make it a big, solid orange button
+	*/
+	padding:		5px 15px;
+
+	font-size:		20px;
+	font-weight:	200;
+	color:			white;
+	
+	background:		rgb(105, 145, 172);	/* metallic blue */
+	border:			0 none;
+    cursor:			pointer;
+    border-radius:	5px;
+    -webkit-border-radius: 5px;
+}
+
+input[type=submit]:hover
+{
+	background:		#009A60; /* forest green */
+}
+
+/* ***********************************************************************************************
+   Link Button
+   	 This is an a-tag surround by a curved box to make it appear as a form button
+     <a class="link-button" href="">Command</a>
+ */
+
+.link-button
+{
+	display:		inline-block;
+	padding:		10px 30px;
+	margin:			12px 0px;
+
+	color:			white;
+	
+	background:		rgb(105, 145, 172);	/* metallic blue */
+	border:			0 none;
+    cursor:			pointer;
+    border-radius:	5px;
+    -webkit-border-radius: 5px;	
+}
+
+.link-button:hover
+{
+	background:		#009A60; /* forest green */
+	text-decoration: none;
+}
+
+.link-button:visited
+{
+	color:			white;
+}
+
+/* ***********************************************************************************************
+ Consent Page
+ */
+
+.consent-bonus-info
+{
+	border: 			1px solid gray;
+	padding: 			20px;
+	width:				70%;
+}
+
+
+/* ***********************************************************************************************
+   Progress bar
+     http://codepen.io/thathurtabit/pen/ymECf
+ */
+
+/* progress-wrap is the top-level container */
+.progress-wrap {
+	background:			rgb(105, 145, 172);	/* metallic blue */
+	text-align:			center;
+	margin-bottom:		10px;
+	overflow:			hidden;
+	position:			relative;
+}
+
+/* progress is the background of the bar */
+.progress {
+	width:				100%;
+	height:				30px;
+}
+
+/* progress-text sits over .progress and is the container for the text message */
+.progress-text
+{
+	position:			absolute;
+	top:				0;
+	left:				0;
+
+	line-height: 		30px;	/* kludge to center a single line of text */
+}
+
+/* progress-bar is the filled-in/completed portion of the progress bar */
+.progress-bar {
+	position:			absolute;
+	top:				0;
+	left:				0;
+
+	background:			#ddd; /*orange*/
+}
+
+
+
+/* ***********************************************************************************************
+   Countdown timer
+ */
+
+#countdown-div
+{
+	width: 				300px;
+	margin-right: 		auto;
+	margin-left: 		auto;
+	text-align: 		center;
+
+}
+
+#countdown-seconds
+{
+	font-size: 40px;
+}
+
+/* ***********************************************************************************************
+Question
+ */
+
+.question-holder
+{
+	text-align: 			center;
+}
+
+.question-image
+{
+}
+
+.question-image, .answer-image
+{
+	/*margin-bottom: 			40px;	*/
+	max-height:         	200px;
+	background-repeat: 		no-repeat;
+	background-position: 	center center;
+	background-size:		contain;
+}
+
+/* ***********************************************************************************************
+ Choice options - table
+ */
+
+table.option-table {
+	border: 			none;
+	border-top: 		1px solid lightGray;
+	width: 				100%;
+	table-layout:		fixed; /* follow css width rules */
+	text-align:  		center;
+	border-collapse: 	collapse;
+	margin-top:			5px;
+}
+tr.option-table {
+	border: 			none;
+}
+
+/* the box around each of the two options */
+td.option-holder
+{
+	margin:				0px 10px 0px 0px;
+	width:				100%;
+	height:				100%;
+
+
+	border-left:		1px solid lightGray;
+	border-right:		1px solid lightGray;
+	padding:			10px;
+	border-collapse: 	collapse;
+
+	vertical-align:		top;
+}
+
+/* the box around the abstain options */
+td.abstain-holder
+{
+	margin:				4px 10px 4px 0px;
+	width:				100%;
+	height:				100%;
+
+	border:				1px solid lightGray;
+	padding:			10px;
+	border-collapse: 	collapse;
+
+	vertical-align:		top;
+	text-align:			center;
+
+	background-color:   snow;
+}
+
+
+/* ***********************************************************************************************
+ Choice options - vote info
+ */
+
+
+/* the container for the vote bar and label
+*/
+.option-info-holder
+{
+}
+
+.option-info-label
+{
+	font-size:			24px;
+	letter-spacing:	    -1px;
+}
+
+
+/* the scaled, red bar
+   the width of the bar is set in the html
+*/
+.option-info-bar
+{
+	
+	background:			rgb(187, 15, 0); /* blood red */
+	border-radius:		4px;
+	height:				20px;
+	vertical-align: 	top;
+	margin-top:      	10px;
+	margin-bottom:      20px;
+}
+
+/* align the left bar against the middle divider */
+.option-info-bar-left
+{
+	margin-left:   		auto;
+}
+
+
+/* ***********************************************************************************************
+ Choice options - content
+ */
+
+
+.option-content
+{
+	text-align: 		center;
+	margin-top:			12px;
+}
+
+.option-content p
+{
+	margin-top:			4px;
+	padding:			0px 8px;
+}
+
+.option-content img
+{
+	border:				1px solid gray;
+	max-width:			100%;
+}
+
+.option-content audio
+{
+	display:			block;
+	width:				80%;
+	margin-left: 		auto;
+	margin-right:		auto;
+}
+
+.button-holder
+{
+}
+
+.button-holder form input[type=submit]
+{
+	margin-left: 		auto;
+	margin-right: 		auto;
+	display:			block;
+	
+	float:			none;
+	padding:		5px 15px;
+
+	font-size:		30px;
+	font-weight:	200;
+	color:			white;
+	
+	background:		gray;
+	border:			0 none;
+    cursor:			pointer;
+    border-radius:	5px;
+    -webkit-border-radius: 5px;
+}
+
+.button-holder form input[type=submit]:hover
+{
+	background:		rgb(187, 15, 0); /* blood red */
+}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Column{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+
+<h1>Column: {{helper_d.col_name}}</h1>
+
+<p>
+	Priority: {{col_level}}
+</p>
+
+{% if helper_d.prev_col_hyperlink %}
+  <p>Previous column: <a id="go-prev" {{ helper_d.prev_col_hyperlink[2:-1] |safe }}></p>
+{% endif %}
+{% if helper_d.next_col_hyperlink %}
+  <p>Next column: <a id="go-next" {{ helper_d.next_col_hyperlink[2:-1] |safe }}></p>
+{% endif %}
+
+<form id="promote-form" action='/column/modify' method='post'>
+	<input type='hidden' name='col_name' value='{{helper_d.col_name}}' >
+	<input type='hidden' name='action' value='promote' >
+	<input type='submit' value='Promote'>
+</form>
+
+<form id="demote-form" action='/column/modify' method='post'>
+	<input type='hidden' name='col_name' value='{{helper_d.col_name}}' >
+	<input type='hidden' name='action' value='demote' >
+	<input type='submit' value='Demote'>
+</form>
+
+{{ describer.html | safe }}
+
+
+{% endblock %}

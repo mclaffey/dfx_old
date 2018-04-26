@@ -1,0 +1,25 @@
+<ul>
+  {% for desc in d._descriptions %}
+  <li>{{ desc }}</li>
+  {% endfor %}
+</ul>
+
+<h2>Relationships</h2>
+
+{% if d.relationships %}
+	<ul>
+	  {% for rel in d.relationships %}
+	  <li>{{ rel[0] }} - {{ rel[1] }}</li>
+	  {% endfor %}
+	</ul>
+{% else %}
+	<p>No relationships</p>
+{% endif %}
+
+<h2>Value counts</h2>
+
+{{ d._unique_values_df_html }}
+
+<h2>Sample rows</h2>
+
+{{ d._sample_df_html }}

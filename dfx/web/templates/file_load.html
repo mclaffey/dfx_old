@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Load data{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+
+<h1>Load data</h1>
+
+<form action="/load_data_file" method="POST">
+	<label for="data_alias">Data alias:</label>
+	<input type="text" name="data_alias" value="{{suggested_alias}}" />
+	<br />
+	<label for="data_path">Path:</label>
+	<input type="text" name="data_path" value="{{ file_path }}" />
+	<br />
+	<input type="submit" />
+</form>
+
+{% endblock %}

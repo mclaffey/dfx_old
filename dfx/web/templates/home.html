@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}dfx{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+
+<h1>Data sets</h1>
+
+<ul>
+{% for data_name in data_names %}
+	<li><a href="data/{{data_name}}">{{data_name}}</a> </li>
+{% endfor %}
+</ul>
+
+<h1>Files</h1>
+
+<ul>
+{% for file_name, file_url in files %}
+	<li>
+		{% if file_url %}
+			<a href="{{file_url}}">{{ file_name }}</a> 
+		{% else %}
+			{{ file_name }}
+		{% endif %}
+	</li>
+{% endfor %}
+</ul>
+
+
+{% endblock %}

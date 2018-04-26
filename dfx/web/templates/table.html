@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Column{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+
+<h1>Manage data</h1>
+
+<form action="./rename" method="POST">
+	<label for="new_data_alias">Rename:</label>
+	<input type="text" name="new_data_alias" value="{{ g._data_name}}"/>
+	<input type="submit" />
+</form>
+
+<form action="./delete" method="POST">
+	<input type="submit" value="Delete" />
+</form>
+
+
+{{ describer.html | safe }}
+
+{% endblock %}

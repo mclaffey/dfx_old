@@ -1,0 +1,19 @@
+<h2>Sample rows</h2>
+
+{{ d._sample_df_html }}
+
+<h2>Qualified relationships</h2>
+
+{% for rel in d.relationships if rel.qualifed %}
+	<h3>{{ rel.__class__.__name__ }}</h3>
+	<p>{{ rel.description }}</p>
+	<p>{{ rel.html | safe }}</p>
+{% endfor %}
+
+<h2>Unqualified relationships</h2>
+{% for rel in d.relationships if not rel.qualifed %}
+	<h3>{{ rel.__class__.__name__ }}</h3>
+	<p>{{ rel.description }}</p>
+	<p>{{ rel.html | safe }}</p>
+{% endfor %}
+

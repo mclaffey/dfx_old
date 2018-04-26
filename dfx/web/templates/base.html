@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <link rel='stylesheet' href='/static/includes/style-1.css' >
+    <link rel='stylesheet' href='/static/includes/jquery-ui-1.12.1.min.css' >    
+    <script src='/static/includes/jquery-3.2.1.min.js'></script>
+    <script src='/static/includes/jquery-ui-1.12.1.min.js'></script>
+    <title>{% block title %}{% endblock %}</title>
+    {% block additional_head_lines %}{% endblock %}
+    {% endblock %}
+
+    <script>
+        $(document).keydown(function(e) {
+        if (e.keyCode == 27) {      // escape
+           $("#command-input").focus();
+           $("#command-input").attr("placeholder", "Type ? for help");
+            return false;
+            };
+        });
+    /*      if (e.keyCode == 37) { // left
+                window.location = $('#go-prev').attr("href");
+                return false;
+            };
+        if (e.keyCode == 38) {      // up
+            $("#promote-form").submit();
+            return false;
+            };
+        if (e.keyCode == 39) {      // right
+            window.location = $('#go-next').attr("href");
+            return false;
+            };
+        if (e.keyCode == 40) {      // down
+             $("#demote-form").submit();
+            return false;
+            };
+        */
+
+      $( function() {
+          var commands =  {{ g.commands | safe }} ;
+          $( "#command-input" ).autocomplete({
+            source: commands,
+            minLength: 0,
+            position: { my : "left bottom", at: "left top" },
+            select: function( event, ui ) {
+              window.location.href = ui.item.value;
+              event.target.value = ui.item.label;
+              event.stopPropogation();
+              },
+            focus: function( event, ui ) {
+              event.target.value = ui.item.label;
+              event.stopPropogation();
+            }
+          });
+        } );
+    </script>
+
+</head>
+
+<body>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+
+    <div id="content">{% block content %}{% endblock %}</div>
+
+
+    <div id="footer">
+        <input id="command-input" placeholder="type <escape> to start command" value="" autocomplete="off">
+        {% block footer %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>
