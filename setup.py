@@ -7,8 +7,9 @@ setup(
     license='MIT',
     description='Explore data tables',
     long_description=open('README.md').read(),
-    install_requires=['numpy', 'pandas'],
+    install_requires=['pandas', 'flask'],
     url='https://github.com/mclaffey/dfx',
     author='Mike Claffey',
-    author_email='mpclaffey@gmail.com'
+    author_email='mpclaffey@gmail.com',
+    include_package_data=True
 )

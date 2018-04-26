@@ -1,0 +1,4 @@
+include dfx/templates/*
+include dfx/web/static/*
+include dfx/web/templates/*
+
