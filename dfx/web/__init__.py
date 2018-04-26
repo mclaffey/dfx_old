@@ -19,10 +19,17 @@ app.register_blueprint(data_bp)
 # #################################################################
 # helpers
 
-def instance_path(rel_path):
+def instance_path(rel_path=''):
     """Append rel_path to the application's instance folder
     """
-    return os.path.join(os.getcwd(), 'instance', rel_path)
+    return os.path.join(os.getcwd(), '.dfx_data', rel_path)
+
+def setup_instance():
+    for dir in [instance_path(), instance_path('df')]:        
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+
+setup_instance()
 
 # #################################################################
 # logging
