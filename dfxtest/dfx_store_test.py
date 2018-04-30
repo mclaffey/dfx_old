@@ -13,9 +13,8 @@ class DfxStoreTest(unittest.TestCase):
 		self.db = DfxStore(self.file_path, exception_if_not_exists=False)
 
 	def tearDown(self):
-		file_path = self.file_path + ".db"
-		if os.path.exists(file_path):
-			os.remove(file_path)
+		if os.path.exists(self.file_path):
+			os.remove(self.file_path)
 
 	# ###############################################################
 

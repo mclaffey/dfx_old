@@ -95,3 +95,6 @@ def _crawl_describer_tests(describer_class):
 
 def start():
     _crawl_describer_tests(dfx.describers.Describer)
+
+if __name__ == '__main__':
+    start()
