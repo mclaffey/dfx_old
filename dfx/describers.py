@@ -1,10 +1,11 @@
 import os
-import logging
+# import logging
 import enum
 
 import jinja2
 import numpy as np # for is_numeric()
 import pandas.util # for get_df_hash()
+import pandas as pd
 
 from . import html as dfx_html
 
@@ -40,9 +41,9 @@ RowPageDescriber             - html page
 """
 
 # #######################################################################################
-# Logging
+# Logging - No logging implemented as of 4/29/2018
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 # #######################################################################################
 # Jinja
@@ -104,7 +105,7 @@ class Describer(object):
     """The abstract framework for describing a dataframe
 
     Usage:
-        d = AbstractDescriber(df)
+        d = Describer(df)
         if d.valid:
             print d.description
             print d.html
@@ -239,6 +240,8 @@ class Describer(object):
     @property
     def html(self):
         self._ensure_calculated()
+        if self._html is None:
+            return self._description
         html = self._html.replace(dfx_html._URL_PREFIX, self._url_prefix)
         return html
 
@@ -288,9 +291,20 @@ class ShapeColumns(Describer):
         cols = [ self.urls.column(col) for col in self.df.columns ]
         self._description = '{} columns: {}'.format(col_count, ", ".join(cols))
 
+    _qualified_dfs = [
+        ('All dfs are qualified', pd.DataFrame(dict(id=['1', '2', '3'], val=[10, 20, 30])))
+        ]
+    _unqualified_dfs = []
+
+
 class ShapeRows(Describer):
     def _calculate(self):
         self._description = '{} rows'.format(self.df.shape[0])
+
+    _qualified_dfs = [
+        ('All dfs are qualified', pd.DataFrame(dict(id=['1', '2', '3'], val=[10, 20, 30])))
+        ]
+    _unqualified_dfs = []
 
 # #######################################################################################
 # Columns
@@ -314,12 +328,26 @@ class ColumnId(ColumnDescriber):
 
     Also mentions if is consecutive and non-null
     """
+
+    _qualified_dfs = [
+        ('consecutive', pd.DataFrame(dict(id=[1, 2, 3]))),
+        ('non-consecutive', pd.DataFrame(dict(id=[1, 2, 4]))),
+        ]
+    _unqualified_dfs = [
+        ('non-numeric', pd.DataFrame(dict(id=['1', '2', '3']))),
+        ('non-unique', pd.DataFrame(dict(id=[1, 1, 2]))),
+        ]
+
     def _calculate(self):
         col = self.df[self.col_name]
         self._is_integer = (col.dtypes == 'int64')
         self._is_unique = not (col.duplicated().any())
         if not (self._is_integer & self._is_unique):
             self._state = State.UNQUALIFIED
+            if not self._is_integer:
+                self._description = "Not an integer"
+            elif not self._is_unique:
+                self._description = "Not unique"
             return
 
         # if qualified
@@ -353,6 +381,13 @@ class ColumnId(ColumnDescriber):
         return False
 
 class ColumnText(ColumnDescriber):
+    _qualified_dfs = [
+        ('text', pd.DataFrame(dict(val=['abc', 'def', 'xyz'])))
+        ]
+    _unqualified_dfs = [
+        ('some numeric', pd.DataFrame(dict(val=['abc', 20, 30])))
+        ]
+
     def _calculate(self):
         col = self.df[self.col_name]
         non_str_types = [str(val_type) for val_type in list(col.apply(type).unique()) if val_type not in [str, unicode]]
@@ -371,6 +406,15 @@ class ColumnText(ColumnDescriber):
 DUPLICATION_THRESHOLD = 0.2
 
 class ColumnDuplicated(ColumnDescriber):
+    """Qualifie if values are duplicated at rate above specified threshold (e.g. 20%)
+    """
+    _qualified_dfs = [
+        ('repeated values', pd.DataFrame(dict(val=[1, 1, 3])))
+        ]
+    _unqualified_dfs = [
+        ('unique values', pd.DataFrame(dict(val=[1, 2, 3])))
+        ]
+
     def _calculate(self):
         self._duplicate_rate = self.df[self.col_name].duplicated().mean()
         if self._duplicate_rate < DUPLICATION_THRESHOLD:
@@ -381,12 +425,25 @@ class ColumnDuplicated(ColumnDescriber):
         self._description = 'Duplicated ({:.1%})'.format(self._duplicate_rate)
 
 class ColumnNumeric(ColumnDescriber):
+    """Qualified if col dtype is numeric
+    """
+    _qualified_dfs = [
+        ('integers', pd.DataFrame(dict(val=[1, 2, 3]))),
+        ('float', pd.DataFrame(dict(val=[1.1, 2.1, 3.1]))),
+        ('mixed', pd.DataFrame(dict(val=[1, 2.1, None]))),
+        ]
+    _unqualified_dfs = [
+        ('has text', pd.DataFrame(dict(val=[1, 2, 'abc']))),
+        ('strings of numbers', pd.DataFrame(dict(val=['1', '2', '3']))),
+        ]
+
     def _calculate(self):
         col = self.df[self.col_name]
         self._is_numeric = np.issubdtype(col.dtype, np.number)
 
         if not self._is_numeric:
             self._state = State.UNQUALIFIED
+            self._description = "Non-numeric type: {}".format(col.dtype)
             return
 
         self._min = col.min()
@@ -394,6 +451,11 @@ class ColumnNumeric(ColumnDescriber):
         self._description = 'Numeric ({}-{})'.format(self._min, self._max)
 
 class ColumnNull(ColumnDescriber):
+    """Qualified if no nulls
+    """
+    _qualified_dfs = [('no nulls', pd.DataFrame(dict(val=[10, 20, 30])))]
+    _unqualified_dfs = [('one null', pd.DataFrame(dict(val=[10, None, 30])))]
+
     def _calculate(self):
         self._null_rate = self.df[self.col_name].isnull().mean()
         self._null_count = self.df[self.col_name].isnull().sum()
@@ -404,18 +466,39 @@ class ColumnNull(ColumnDescriber):
             self._state = State.UNQUALIFIED
 
 class ColumnUnique(ColumnDescriber):
+    """Qualified if no values are repeated
+    """
+
+    _qualified_dfs = [('all unique', pd.DataFrame(dict(val=[10, 20, 30])))]
+    _unqualified_dfs = [('repeated value', pd.DataFrame(dict(val=[10, 10, 30])))]
+
     def _calculate(self):
         self._duplicate_rate = self.df[self.col_name].duplicated().mean()
         if self._duplicate_rate == 0:
             self._description = 'Unique'
         else:
-            dup_str = "{:.1%} duplicated".format(self._duplicate_rate)
+            self._description = "{:.1%} duplicated".format(self._duplicate_rate)
             self._state = State.UNQUALIFIED
 
 COLUMN_CLASSES = [ColumnId, ColumnText, ColumnNumeric, ColumnNull, ColumnUnique, ColumnDuplicated]
 
 class ColumnPageDescriber(ColumnDescriber):
+    _qualified_dfs = [
+        ('consecutive id', pd.DataFrame(dict(id=[1, 2, 3]))),
+        ('non-consecutive id', pd.DataFrame(dict(id=[1, 2, 4]))),
+        ('text', pd.DataFrame(dict(val=['abc', 'def', 'xyz']))),
+        ('repeated values', pd.DataFrame(dict(val=[1, 1, 3]))),
+        ('integers', pd.DataFrame(dict(val=[1, 2, 3]))),
+        ('float', pd.DataFrame(dict(val=[1.1, 2.1, 3.1]))),
+        ('mixed numeric', pd.DataFrame(dict(val=[1, 2.1, None]))),
+        ('no nulls', pd.DataFrame(dict(val=[10, 20, 30]))),
+        ('all unique', pd.DataFrame(dict(val=[10, 20, 30]))),
+        ]
+    _unqualified_dfs = []
+
     def _calculate(self):
+
+        self._description = "(see html)"
 
         # sample rows
         col_index = list(self.df.columns).index(self.col_name)
@@ -482,6 +565,12 @@ class RelationshipDescriber(Describer):
 class RelationshipAnova(RelationshipDescriber):
     """Expects first column to be group name, second column to be numeric
     """
+    _qualified_dfs = [
+        ('different means', pd.DataFrame(dict(group=['a', 'a', 'a', 'b', 'b', 'b'], val=[10, 20, 30, 100, 110, 120]))),
+        ]
+    _unqualified_dfs = [
+        ('overlapping means', pd.DataFrame(dict(group=['a', 'a', 'a', 'b', 'b', 'b'], val=[10, 20, 30, 11, 21, 31]))),
+        ]
     f = None
     p = None
     def _calculate(self):
@@ -530,6 +619,12 @@ class RelationshipAnova(RelationshipDescriber):
 class RelationshipCorrelation(RelationshipDescriber):
     """Both columns must be numeric
     """
+    _qualified_dfs = [
+        ('linear increase', pd.DataFrame(dict(x=range(10, 15), y=range(20, 25)))),
+        ]
+    _unqualified_dfs = [
+        ('random', pd.DataFrame(dict(x=[1, 5, 2, 4, 3], y=[1, 2, 3, 4, 5]))),
+        ]
     r = None
     p = None
     def _calculate(self):
@@ -567,8 +662,16 @@ class RelationshipCorrelation(RelationshipDescriber):
         self._html = "<p>Pearon's correlation r={:.2}, p={:.2}</p>".format(self.r, self.p)
 
 class RelationshipOneToMany(RelationshipDescriber):
+    """Qualified if columns are not many:many
     """
-    """
+    _qualified_dfs = [
+        ('one to many', pd.DataFrame(dict(region = ['west', 'west', 'east', 'east'], state = ['CA', 'WA', 'NC', 'NY']))),
+        ('one to one', pd.DataFrame(dict(x = [1, 2, 3, 4], y = [10, 11, 12, 13]))),
+        ]
+    _unqualified_dfs = [
+        ('many to many', pd.DataFrame(dict(first_name = ['john', 'john', 'mike', 'mike'], last_name = ['smith', 'jones', 'smith', 'jones']))),
+        ]
+
     def _calculate(self):
         col_1 = self.df[self.col_1_name]
         col_2 = self.df[self.col_2_name]
@@ -602,7 +705,16 @@ RELATIONSHIP_CLASSES = [RelationshipAnova, RelationshipCorrelation, Relationship
 class RelationshipPageDescriber(RelationshipDescriber):
     """For two columns, describer all relationships
     """
+    _qualified_dfs = [
+        ('different means', pd.DataFrame(dict(group=['a', 'a', 'a', 'b', 'b', 'b'], val=[10, 20, 30, 100, 110, 120]))),
+        ('linear increase', pd.DataFrame(dict(x=range(10, 15), y=range(20, 25)))),
+        ('one to many', pd.DataFrame(dict(region = ['west', 'west', 'east', 'east'], state = ['CA', 'WA', 'NC', 'NY']))),
+        ('one to one', pd.DataFrame(dict(x = [1, 2, 3, 4], y = [10, 11, 12, 13]))),
+        ]
+    _unqualified_dfs = []
     def _calculate(self):
+
+        self._description = "(see html)"
 
         # sample rows
         self._sample_df_html = dfx_html.df_to_html(self.df.ix[0:5, [self.col_1_name, self.col_2_name]], self.urls)
@@ -620,6 +732,11 @@ class RelationshipPageDescriber(RelationshipDescriber):
 # Row Page Describer
 
 class RowPageDescriber(Describer):
+    _qualified_dfs = [
+        ('', pd.DataFrame(dict(emp_id = [123, 456], name=['john', 'tom'], age=[39, 62]))),
+        ]
+    _unqualified_dfs = []
+
     def __init__(self, df, row_num):
         self.df = df
         self._set_hash(row_num)
@@ -627,6 +744,7 @@ class RowPageDescriber(Describer):
         self.row_series = df.ix[row_num, :]
 
     def _calculate(self):
+        self._description = "(see html)"
         template = jinja_env.get_template('row.html')
         self._html = template.render(describer=self)
 
@@ -636,9 +754,15 @@ class RowPageDescriber(Describer):
 class TablePageDescriber(Describer):
     """For a dataframe, build an HTML page of all relevant describers
     """
+    _qualified_dfs = [
+        ('people', pd.DataFrame(dict(emp_id = [123, 456], name=['john', 'tom'], age=[39, 62]))),
+        ('one to many', pd.DataFrame(dict(region = ['west', 'west', 'east', 'east'], state = ['CA', 'WA', 'NC', 'NY']))),
+        ('one to one', pd.DataFrame(dict(x = [1, 2, 3, 4], y = [10, 11, 12, 13]))),
+        ]
+    _unqualified_dfs = []
 
     def _calculate(self):
-        logger.debug("TablePageDescriber._calculate()")
+        self._description = "(see html)"
 
         df = self.df
 
@@ -696,6 +820,10 @@ class TablePageDescriber(Describer):
 class ValuePageDescriber(Describer):
     """For a given value in a column, show sample rows, frequency, means, etc
     """
+    _qualified_dfs = [
+        ('one to many', pd.DataFrame(dict(region = ['west', 'west', 'east', 'east'], state = ['CA', 'WA', 'NC', 'NY']))),
+        ]
+    _unqualified_dfs = []
     def __init__(self, df, col_name, val):
         self.df = df
         self._set_hash(col_name, val)
@@ -705,6 +833,8 @@ class ValuePageDescriber(Describer):
     def _calculate(self):
         # sample rows
         # assume val is always passed as a string, so convert the column to string
+        self._description = "(see html)"
+
         i = self.df[self.col_name].apply(str)==self.val
         self._sample_df_html = dfx_html.df_to_html(self.df.ix[i, :].head(), self.urls)
 
@@ -742,7 +872,7 @@ def suppression_check(describers):
             if some_describer.suppresses(describer_in_question):
                 is_unsuppressed = False
                 suppressed_describers.append(describer_in_question)
-                print some_describer.hash, " suppresses ", describer_in_question.hash
+                # print some_describer.hash, " suppresses ", describer_in_question.hash
                 break
         # if we got here, describer is not suppressed
         if is_unsuppressed:
