@@ -115,22 +115,28 @@ class DfxStore(object):
             value.df = df
 
 
-    def get_or_create(self, klas, df, *args):
+    def get_or_create(self, klas, df, *args, **kwargs):
         """Given a class and instantiation arguments, returns a saved instance if one
         matches, or creates a new one if a saved instances does not exist.
 
+        If force_create is True, will create new instance and save to data store,
+        ignoring any instance already in data store.
+
         """
+        force_create = kwargs.get('force_create', False)
+
         # create a shell instance, which won't have anything calculated
         instance = klas(df, *args)
         
         # try getting an existing instance from the store
         cached = None
-        try:
-            cached = self.get(instance.hash)
-        except EmptyShelfException:
-            pass
-        except KeyError:
-            pass
+        if not force_create:
+            try:
+                cached = self.get(instance.hash)
+            except EmptyShelfException:
+                pass
+            except KeyError:
+                pass
 
         # if an instance existed in the store, run with that
         if cached is not None:

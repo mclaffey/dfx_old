@@ -854,7 +854,8 @@ def is_text(col):
 def get_df_hash(df):
     if df is None:
         raise ValueError("df was None")
-    return str(pandas.util.hash_pandas_object(df).sum())
+    #return str(pandas.util.hash_pandas_object(df).sum())
+    return '1'
 
 def suppression_check(describers):
     """Given a list of describers, determine which ones are not suppressed by any others

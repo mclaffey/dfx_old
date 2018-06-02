@@ -116,7 +116,8 @@ def column_page(col_name):
         )
 
     db = get_db()
-    describer = db.get_or_create(describers.ColumnPageDescriber, df, col_name)
+    regenerate_describer = ('reload' in request.args)
+    describer = db.get_or_create(describers.ColumnPageDescriber, df, col_name, force_create=regenerate_describer)
     set_describer_url_prefix(describer)
     g.commands = get_commands(df)
 
