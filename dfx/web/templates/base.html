@@ -5,10 +5,17 @@
     {% block head %}
     <link rel='stylesheet' href='/static/includes/style-1.css' >
     <link rel='stylesheet' href='/static/includes/jquery-ui-1.12.1.min.css' >    
+    <link rel='stylesheet' href='/static/includes/annotate.css' >
     <script src='/static/includes/jquery-3.2.1.min.js'></script>
     <script src='/static/includes/jquery-ui-1.12.1.min.js'></script>
+    <script src='/static/includes/annotate.js'></script>
     <title>{% block title %}{% endblock %}</title>
     {% block additional_head_lines %}{% endblock %}
+    <script>
+      $(function() { prepareBlurbs("/annotate", ".dfx-blurb"); });
+    </script>
+
+
     {% endblock %}
 
     <script>
@@ -54,11 +61,6 @@
             }
           });
         } );
-
-      $( ".blurb-section" ).mouseenter(function() {
-        alert('hi');
-        $( "#blurb-button").show();
-      });
 
     </script>
 

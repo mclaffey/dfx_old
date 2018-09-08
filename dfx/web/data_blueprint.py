@@ -201,7 +201,7 @@ def rename():
 
 @data_bp.route('/delete', methods=['POST'])
 def delete():
-    """Move a dataset picke file to instance/df/recycle
+    """Move a dataset pickle file to instance/df/recycle
     """
     old_path = df_pickle_path(g._data_name)
     new_path = df_pickle_path(g._data_name, sub_directory="recycle")

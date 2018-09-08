@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Blurb{% endblock %}
+{% block content %}
+
+<script type="text/javascript">
+
+    function prepareSubBlurbs() {
+    	// For insert text box, provide autocomplete to addresses
+		var available_addresses =  {{ available_addresses | safe }} ;
+		$( ".new-reference" ).autocomplete({
+			source: available_addresses,
+			minLength: 0,
+			position: { my : "left bottom", at: "left top" },
+			select: function( event, ui ) {
+				event.target.value = ui.item.label;
+				event.stopPropogation = true;
+
+			},
+			focus: function( event, ui ) {
+				event.target.value = ui.item.label;
+				event.stopPropogation = true;
+			}
+		});
+		// Index numbers for each subblurb
+		$(".sub-blurb-index").each(function(index) {
+			$(this).val(index + 1);
+		});
+    };
+
+	$(function() {
+
+		prepareSubBlurbs();
+
+		// on change address, update with ajax
+		$('#new-address').change(function () {
+			var form_data = $('#change-address').serialize();
+			$.post('/modify', form_data, function(responseData, textStatus) {
+				window.location.href = responseData.url;
+			}, 'json');
+		});
+
+		// on content click or focus+enter, switch to form
+		$('.blurb-content-display').on('click keyup', function (e) {
+			if (e.type=='keyup' & e.keyCode != 13) {
+				return
+			};
+			$(this).hide();
+			$(this).parent().children('.blurb-content-edit').show();
+			var input = $(this).parent().find("#new-content");
+			input.focus()
+			input.selectionStart = input.selectionEnd = input.val().length;
+		});
+
+		// when leaving content edit, redisplay preview
+		$('.blurb-content-edit').focusout(function() {
+			$(this).hide();
+			$(this).parent().children('.blurb-content-display').show();
+		});
+
+		// on change content, update with ajax
+		$('#new-content').change(function () {
+			var form = $(this).parent();
+			var form_data = form.serialize();
+			form.parent().parent().children('.blurb-content-display').html($(this).val());
+			$.post('/modify', form_data, function(responseData, textStatus) {
+				flashMessage('Content updated');
+			}, 'json');
+		});
+
+		// remove reference, click or focus+enter
+		$('.remove-reference').on("click keyup", function (e) {
+			if (e.type == 'keyup' & e.keyCode != 13) {
+				return;
+			}
+			var form_data = $(this).parent().serialize();
+			var sub_blurb = $(this).parents('.sub-blurb');
+			$.post('/remove-reference', form_data, function(responseData, textStatus) {
+				sub_blurb.remove();
+				flashMessage('Removed reference to ' + form_data['ref-address-to-delete']);
+			}, "json");
+		});
+
+		// on change insert, add new reference
+		$('.new-reference').change(function () {
+			var form_data = $(this).parent().serialize();
+			$.post('/add-reference', form_data, function(responseData, textStatus) {
+				if (responseData['status'] == 'success') {
+					var new_blurb = $(responseData['html']);
+					$(".selected-blurb").removeClass(".selected-blurb");
+					new_blurb.addClass(".selected-blurb");
+					$('#sub-blurb-list').append(new_blurb);
+					prepareSubBlurbs();
+					flashMessage('Added reference to ' + form_data['new-reference']);
+				} else {
+					flashMessage('Add failed: ' + responseData['message']);
+				};
+				
+			}, 'json');
+		});
+
+		// arrow keys to navigate
+		$('body').keyup(function(e) {
+			if (e.keyCode == 38) { // up
+				var current = $('.selected-blurb');
+				if (current.length == 0) {
+					$('.sub-blurb').last().addClass("selected-blurb");
+				} else {
+					current.removeClass("selected-blurb");
+					var next = current.prev(".sub-blurb");
+					next.addClass("selected-blurb");
+				};
+			};
+			if (e.keyCode == 40) { // down
+				var current = $('.selected-blurb');
+				if (current.length == 0) {
+					$('.sub-blurb').first().addClass("selected-blurb");
+				} else {
+					current.removeClass("selected-blurb");
+					var next = current.next(".sub-blurb");
+					next.addClass("selected-blurb");
+				};
+			};
+			if (e.keyCode == 67) { // c - copy
+				var current = $('.selected-blurb');
+				if (current.length == 0) {
+					flashMessage("No blurb selected");
+				} else {
+					var address = current.find('.sub-blurb-address').text();
+					$.data( document.body, "clipboard-address", address);
+					flashMessage("Saved to clipboard: " + address);
+				};
+			};
+			if (e.keyCode == 88) { // x - cut
+				var current = $('.selected-blurb');
+				if (current.length == 0) {
+					flashMessage("No blurb selected");
+				} else {
+					var address = current.find('.sub-blurb-address').text();
+					$.data( document.body, "clipboard-address", address);
+					var form_data = current.find('.remove-reference').parent().serialize();
+					$.post('/remove-reference', form_data, function(responseData, textStatus) {
+						current.remove();
+						prepareSubBlurbs();
+						flashMessage('Cut reference to ' + address);
+					}, "json");
+				};
+			};
+			if (e.keyCode == 86) { // v - paste
+				var current = $('.selected-blurb');
+				if (current.length == 0) {
+					flashMessage("No blurb selected");
+					return;
+				}				
+				var address = $.data( document.body, "clipboard-address");
+				if (!address) {
+					flashMessage('Nothing in clipboard');
+					return;
+				};
+
+				var insert_index = current.find(".sub-blurb-index").val();
+				insert_index = parseInt(insert_index) - 1;
+
+				var form_data = {
+					'address': $('#this-blurb-address').val(),
+					'new-reference': address,
+					'insert-index': insert_index};
+				$.post('/add-reference', form_data, function(responseData, textStatus) {
+					if (responseData['status'] == 'success') {
+						var new_blurb = $(responseData['html']);
+						new_blurb.insertAfter(current);
+						current.removeClass(".selected-blurb");
+						new_blurb.addClass(".selected-blurb");
+						prepareSubBlurbs();
+						flashMessage('Added reference to ' + form_data['new-reference']);
+					} else {
+						flashMessage('Add failed: ' + responseData['message']);
+					};
+					
+				}, 'json');
+			};
+
+		});
+
+
+	});
+
+</script>
+
+<div id="blurb-message-holder"></div>
+
+<div class="blurb-controls">
+	<div class='blurb-address'>
+		<form id="change-address" method="POST" action="/modify">
+			<input id="new-address" name="new-address" value="{{blurb.address}}" />
+			<input type="hidden" id="this-blurb-address" name="address" value="{{blurb.address}}" />
+		</form>
+	</div>
+</div>
+
+<div class='blurb-content-holder'>
+	<div class='blurb-content-display' tabindex="0">
+		{{ blurb.content | safe }}
+	</div>
+	<div class='blurb-content-edit'>
+		<form method="POST" action="/modify">
+			<textarea id="new-content" name="new-content">{{blurb.content}}</textarea>
+			<input type="hidden" name="address" value="{{blurb.address}}" />
+		</form>
+	</div>
+
+</div>
+
+<div id="sub-blurb-list">
+	{% for i, ref in g.enumerate(blurb.ref_list_resolved) %}
+		{% include "sub-blurb.html" %}
+	{% endfor %}
+</div>
+
+<div class="sub-blurb">
+	<form method="POST" action="/add-reference">
+		<input type="hidden" name="address" value="{{blurb.address}}" />
+		<input name="new-reference" class="new-reference" placeholder="new reference" />
+	</form>
+</div>
+
+
+
+{% endblock %}

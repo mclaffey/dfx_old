@@ -14,7 +14,7 @@ class DfxStore(object):
     -- get_or_create
 
         Takes a class and instantiation arguments. If it has a saved object matching
-        those, it returns that object. If it does not havea  saved object, it instantiates
+        those, it returns that object. If it does not have a saved object, it instantiates
         the object and returns that.
 
         The point is that rather than the calling code creating the object, it passes
