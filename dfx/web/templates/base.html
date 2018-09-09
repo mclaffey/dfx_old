@@ -45,7 +45,11 @@
         */
 
       $( function() {
+          {% if g.commands %}
           var commands =  {{ g.commands | safe }} ;
+          {% else %}
+          var commands =  [];
+          {% endif %}
           $( "#command-input" ).autocomplete({
             source: commands,
             minLength: 0,

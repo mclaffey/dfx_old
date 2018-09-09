@@ -1,11 +1,12 @@
 	<div class="sub-blurb">
 		<form method="POST" action="/add-reference">
 			<input type="hidden" name="address" value="{{blurb.address}}" />
+			<input type="hidden" name="insert-index" value="{{i}}" />
 			<input name="new-reference" class="new-reference" placeholder="new reference" />
 		</form>
 
 		<div class="blurb-controls">
-			<a class="blurb-address sub-blurb-address" href="{{ url_for('annotate.view', address=ref.address ) }}">{{ref.address}}</a>
+			<a class="blurb-address sub-blurb-address" href="{{ url_for('annotate.view', address=ref.address ) }}?return_to={{blurb.address}}">{{ref.address}}</a>
 			<form class="inline" method="POST" action="/move-reference">
 				<input type="hidden" name="parent-address" value="{{blurb.address}}" />
 				<input type="hidden" name="ref-address-to-move" value="{{ref.address}}" />

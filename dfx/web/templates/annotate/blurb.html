@@ -13,12 +13,12 @@
 			position: { my : "left bottom", at: "left top" },
 			select: function( event, ui ) {
 				event.target.value = ui.item.label;
-				event.stopPropogation = true;
+				if (event.stopPropogation) event.stopPropogation();
 
 			},
 			focus: function( event, ui ) {
 				event.target.value = ui.item.label;
-				event.stopPropogation = true;
+				if (event.stopPropogation) event.stopPropogation();
 			}
 		});
 		// Index numbers for each subblurb
@@ -34,7 +34,7 @@
 		// on change address, update with ajax
 		$('#new-address').change(function () {
 			var form_data = $('#change-address').serialize();
-			$.post('/modify', form_data, function(responseData, textStatus) {
+			$.post('/annotate/modify', form_data, function(responseData, textStatus) {
 				window.location.href = responseData.url;
 			}, 'json');
 		});
@@ -62,8 +62,8 @@
 			var form = $(this).parent();
 			var form_data = form.serialize();
 			form.parent().parent().children('.blurb-content-display').html($(this).val());
-			$.post('/modify', form_data, function(responseData, textStatus) {
-				flashMessage('Content updated');
+			$.post('/annotate/modify', form_data, function(responseData, textStatus) {
+				flashAnnotateMessage('Content updated');
 			}, 'json');
 		});
 
@@ -74,25 +74,26 @@
 			}
 			var form_data = $(this).parent().serialize();
 			var sub_blurb = $(this).parents('.sub-blurb');
-			$.post('/remove-reference', form_data, function(responseData, textStatus) {
+			$.post('/annotate/remove-reference', form_data, function(responseData, textStatus) {
 				sub_blurb.remove();
-				flashMessage('Removed reference to ' + form_data['ref-address-to-delete']);
+				flashAnnotateMessage(responseData['message']);
 			}, "json");
 		});
 
-		// on change insert, add new reference
+		// after changing a value of the 'insert new refernce' fields, add new reference
 		$('.new-reference').change(function () {
+			var existing_sub_blurb = $(this).parent().parent();
 			var form_data = $(this).parent().serialize();
-			$.post('/add-reference', form_data, function(responseData, textStatus) {
+			$.post('/annotate/add-reference', form_data, function(responseData, textStatus) {
 				if (responseData['status'] == 'success') {
 					var new_blurb = $(responseData['html']);
 					$(".selected-blurb").removeClass(".selected-blurb");
 					new_blurb.addClass(".selected-blurb");
-					$('#sub-blurb-list').append(new_blurb);
+					existing_sub_blurb.before(new_blurb);
 					prepareSubBlurbs();
-					flashMessage('Added reference to ' + form_data['new-reference']);
+					flashAnnotateMessage('Added reference to ' + form_data['new-reference']);
 				} else {
-					flashMessage('Add failed: ' + responseData['message']);
+					flashAnnotateMessage('Add failed: ' + responseData['message']);
 				};
 				
 			}, 'json');
@@ -123,17 +124,17 @@
 			if (e.keyCode == 67) { // c - copy
 				var current = $('.selected-blurb');
 				if (current.length == 0) {
-					flashMessage("No blurb selected");
+					flashAnnotateMessage("No blurb selected");
 				} else {
 					var address = current.find('.sub-blurb-address').text();
 					$.data( document.body, "clipboard-address", address);
-					flashMessage("Saved to clipboard: " + address);
+					flashAnnotateMessage("Saved to clipboard: " + address);
 				};
 			};
 			if (e.keyCode == 88) { // x - cut
 				var current = $('.selected-blurb');
 				if (current.length == 0) {
-					flashMessage("No blurb selected");
+					flashAnnotateMessage("No blurb selected");
 				} else {
 					var address = current.find('.sub-blurb-address').text();
 					$.data( document.body, "clipboard-address", address);
@@ -141,19 +142,19 @@
 					$.post('/remove-reference', form_data, function(responseData, textStatus) {
 						current.remove();
 						prepareSubBlurbs();
-						flashMessage('Cut reference to ' + address);
+						flashAnnotateMessage('Cut reference to ' + address);
 					}, "json");
 				};
 			};
 			if (e.keyCode == 86) { // v - paste
 				var current = $('.selected-blurb');
 				if (current.length == 0) {
-					flashMessage("No blurb selected");
+					flashAnnotateMessage("No blurb selected");
 					return;
 				}				
 				var address = $.data( document.body, "clipboard-address");
 				if (!address) {
-					flashMessage('Nothing in clipboard');
+					flashAnnotateMessage('Nothing in clipboard');
 					return;
 				};
 
@@ -164,16 +165,16 @@
 					'address': $('#this-blurb-address').val(),
 					'new-reference': address,
 					'insert-index': insert_index};
-				$.post('/add-reference', form_data, function(responseData, textStatus) {
+				$.post('/annotate/add-reference', form_data, function(responseData, textStatus) {
 					if (responseData['status'] == 'success') {
 						var new_blurb = $(responseData['html']);
 						new_blurb.insertAfter(current);
 						current.removeClass(".selected-blurb");
 						new_blurb.addClass(".selected-blurb");
 						prepareSubBlurbs();
-						flashMessage('Added reference to ' + form_data['new-reference']);
+						flashAnnotateMessage('Added reference to ' + form_data['new-reference']);
 					} else {
-						flashMessage('Add failed: ' + responseData['message']);
+						flashAnnotateMessage('Add failed: ' + responseData['message']);
 					};
 					
 				}, 'json');
@@ -188,9 +189,18 @@
 
 <div id="blurb-message-holder"></div>
 
+{% if session.return_to %}
+<div class='blurb-address'>
+	Return to <a href="{{session.return_to}}">{{session.return_to}}</a>
+</div>
+{% endif %}
+
+
+
+
 <div class="blurb-controls">
 	<div class='blurb-address'>
-		<form id="change-address" method="POST" action="/modify">
+		<form id="change-address" method="POST" action="/annotate/modify">
 			<input id="new-address" name="new-address" value="{{blurb.address}}" />
 			<input type="hidden" id="this-blurb-address" name="address" value="{{blurb.address}}" />
 		</form>
@@ -202,8 +212,8 @@
 		{{ blurb.content | safe }}
 	</div>
 	<div class='blurb-content-edit'>
-		<form method="POST" action="/modify">
-			<textarea id="new-content" name="new-content">{{blurb.content}}</textarea>
+		<form method="POST" action="/annotate/modify">
+			<textarea id="new-content" name="new-content" rows="12" >{{blurb.content}}</textarea>
 			<input type="hidden" name="address" value="{{blurb.address}}" />
 		</form>
 	</div>
@@ -212,16 +222,23 @@
 
 <div id="sub-blurb-list">
 	{% for i, ref in g.enumerate(blurb.ref_list_resolved) %}
-		{% include "sub-blurb.html" %}
+		{% include "annotate/sub-blurb.html" %}
 	{% endfor %}
 </div>
 
 <div class="sub-blurb">
-	<form method="POST" action="/add-reference">
+	<form method="POST" action="/annotate/add-reference">
 		<input type="hidden" name="address" value="{{blurb.address}}" />
+		<input type="hidden" name="insert-index" value="{{ blurb.ref_list_resolved|length }}" />
 		<input name="new-reference" class="new-reference" placeholder="new reference" />
 	</form>
 </div>
+
+<form id="delete-blurb" method="POST" action="/annotate/delete">
+	<input type="hidden" id="delete-blurb-address" name="address" value="{{blurb.address}}" />
+	<input type="checkbox" name="delete-references" value="True">Delete references
+	<input type="submit" value="Delete blurb" />
+</form>
 
 
 

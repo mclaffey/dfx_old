@@ -31,15 +31,19 @@ function prepareBlurbs(url_prefix, blurbable_selector) {
 		// content = $(this).parent().contents().filter(function(){ return this.nodeType == 3; })[0].nodeValue
 		content = $(this).parent().clone();
 		content.children(".blurb-button").remove();
-		content = content.html();
-		$.getJSON(url_prefix + '/add_to_current', {
+/*		content = content.html();
+		$.getJSON(url_prefix + '/annotate/add_to_current', {
 			content: content
-		}, function(new_blurb_address) {
-			flashAnnotateMessage('Created <a href="/annotate/view/' + new_blurb_address + '">' + new_blurb_address + '</a>');
+		}, function(resp) {
+			flashAnnotateMessage('Created <a href="/annotate/view/' + resp.new_blurb + '">' + resp.new_blurb + 
+				'</a> on <a href="/annotate/view/' + resp.parent_blurb + '">' + resp.parent_blurb + '</a>');
 	    })
-	    	.fail(function() {
-	    		flashAnnotateMessage('Failed to blurb');
+	    	.fail(function(jqXHR, textStatus, errorThrown)  {
+	    		flashAnnotateMessage('Failed to blurb' + textStatus);
 	    	});
+*/    	$.post(url_prefix + '/annotate/add_to_current', {content: content.html()}, function(responseData) {
+    		flashAnnotateMessage(responseData['message']);
+    		});
 
 
 	  	return false;
