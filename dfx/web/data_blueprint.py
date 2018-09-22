@@ -173,7 +173,8 @@ def relationship_page(col_1_name, col_2_name):
     df = get_df()
     g.commands = get_commands(df)
     db = get_db()
-    describer = db.get_or_create(describers.RelationshipPageDescriber, df, col_1_name, col_2_name)
+    force_create = ('refresh' in request.args)
+    describer = db.get_or_create(describers.RelationshipPageDescriber, df, col_1_name, col_2_name, force_create=force_create)
     set_describer_url_prefix(describer)
     return render_template('relationship.html', describer = describer)
 

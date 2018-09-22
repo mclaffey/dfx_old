@@ -531,7 +531,7 @@ class ColumnPageDescriber(ColumnDescriber):
         for col_2_name in self.df.columns:
             if col_2_name == self.col_name:
                 continue
-            for relationship_class in [RelationshipAnova]:
+            for relationship_class in RELATIONSHIP_CLASSES:
                 relationship = factory.get_or_create(relationship_class, self.df, self.col_name, col_2_name)
                 if relationship.qualified:
                     self.relationships.append(
@@ -658,8 +658,14 @@ class RelationshipCorrelation(RelationshipDescriber):
             self._state = State.UNQUALIFIED
             return
 
+        if self.qualified:
+            import matplotlib.pyplot as plt
+            f = plt.figure()
+            plt.scatter(x, y)
+            plt.savefig('describer-scatter.png')
+
         # html
-        self._html = "<p>Pearon's correlation r={:.2}, p={:.2}</p>".format(self.r, self.p)
+        self._html = "<p>Pearon's correlation r={:.2}, p={:.2}</p> <img src='describer-scatter.png'>".format(self.r, self.p)
 
 class RelationshipOneToMany(RelationshipDescriber):
     """Qualified if columns are not many:many
