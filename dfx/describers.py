@@ -1,6 +1,6 @@
 import os
-# import logging
 import enum
+import random
 
 import jinja2
 import numpy as np # for is_numeric()
@@ -8,6 +8,8 @@ import pandas.util # for get_df_hash()
 import pandas as pd
 
 from . import html as dfx_html
+
+_IMAGE_BASE_PATH = ''
 
 # see helpers at bottom for on-demand imports: numpy, pandas.util
 
@@ -450,6 +452,25 @@ class ColumnNumeric(ColumnDescriber):
         self._max = col.max()
         self._description = 'Numeric ({}-{})'.format(self._min, self._max)
 
+        # histogram
+        import matplotlib.pyplot as plt
+        try:
+            f = plt.figure()
+            plt.hist(col)
+            image_path, image_url = propose_image_path()
+            plt.savefig(image_path)
+
+            self._html = """
+                <p>{}</p>
+                <img src="{}">
+                """.format(self._description, image_url)
+        except StandardError as e:
+            self._html = """
+                <p>{}</p>
+                <pre>{}</pre>
+                """.format(self._description, e)
+
+
 class ColumnNull(ColumnDescriber):
     """Qualified if no nulls
     """
@@ -515,7 +536,7 @@ class ColumnPageDescriber(ColumnDescriber):
         for describer_class in COLUMN_CLASSES:
             describer = factory.get_or_create(describer_class, self.df, self.col_name)
             if describer.qualified:
-                self._descriptions.append(describer.description)
+                self._descriptions.append(describer.html)
 
         # unique values
         x = self.df[self.col_name].value_counts().to_frame().reset_index()
@@ -650,7 +671,7 @@ class RelationshipCorrelation(RelationshipDescriber):
             self._state = State.INVALID
             return
 
-        # qualified
+        # determine if qualified
         if self.p < .05:
             self._description = "{} and {} are correlated (r={:.1}, p={:.1})".format(self.col_1_name, self.col_2_name, self.r, self.p)
         else:
@@ -658,14 +679,31 @@ class RelationshipCorrelation(RelationshipDescriber):
             self._state = State.UNQUALIFIED
             return
 
-        if self.qualified:
-            import matplotlib.pyplot as plt
-            f = plt.figure()
-            plt.scatter(x, y)
-            plt.savefig('describer-scatter.png')
+        # only continuing here if qualified
+
+        # regression, to plot best fit line
+        import statsmodels.api
+        import numpy as np
+        regression = statsmodels.api.OLS(y,statsmodels.api.add_constant(x)).fit()
+        constant, slope = regression.params
+        x_fit = np.linspace(x.min(), x.max(), 100)
+        y_fit = x_fit*slope + constant
+
+        # scatter plot with fit line
+        import matplotlib.pyplot as plt
+        f = plt.figure()
+        plt.scatter(x, y)
+        plt.plot(x_fit, y_fit)
+        image_path, image_url = propose_image_path()
+        plt.savefig(image_path)
+        
 
         # html
-        self._html = "<p>Pearon's correlation r={:.2}, p={:.2}</p> <img src='describer-scatter.png'>".format(self.r, self.p)
+        self._html = """
+            <p>Pearon's correlation r={:.2}, p={:.2}</p>
+            <img src='{}'>
+            <pre>{}</pre>
+            """.format(self.r, self.p, image_url, regression.summary())
 
 class RelationshipOneToMany(RelationshipDescriber):
     """Qualified if columns are not many:many
@@ -885,3 +923,17 @@ def suppression_check(describers):
         if is_unsuppressed:
             unsuppressed_describers.append(describer_in_question)
     return (unsuppressed_describers, suppressed_describers)
+
+def propose_image_path():
+    """Returns a filename with path to which newly generated images should be saved.
+
+    This generates random file names, to avoid file naming collisions.
+
+    This uses _IMAGE_BASE_PATH, with the expectation that the web server will set this
+    constant before any describers are generated
+    """
+    image_name = "image_{}.png".format(''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(8)))
+    image_path = os.path.join(_IMAGE_BASE_PATH, image_name)
+    image_url = '/images/' + image_name
+    return image_path, image_url
+

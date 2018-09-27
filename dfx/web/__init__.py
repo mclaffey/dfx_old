@@ -157,5 +157,12 @@ def load_file():
 
     return redirect(url_for('data.summary', data_name = data_alias))
 
+# ########################################################################
+# Image serving
+
+@app.route('/images/<path:path>')
+def serve_image(path):
+    return send_from_directory(instance_path('images'), path)
+
 
 

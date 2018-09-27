@@ -39,6 +39,16 @@ class DfxStore(object):
 
         self._file_path = file_path
 
+        """Force refresh is for generating a describer from scratch, even if it already
+        exists in the data store.
+
+        There is both this instance flag below, as well as a force_refresh argument that is
+        passed to .get_or_create(). The user initiates a force refresh using the argument
+        to .get_for_create(), but that method will then set the below flag to True, so that
+        all additional describers required by the first decriber will also be regenerated.
+        """
+        self._force_create = False
+
     def _get_shelf(self, flag=None):
         """Create a connection to shelf
 
@@ -123,14 +133,17 @@ class DfxStore(object):
         ignoring any instance already in data store.
 
         """
-        force_create = kwargs.get('force_create', False)
+        logger.debug("get_or_create() Start: {} / {} / {}".format(klas.__name__, args, kwargs))
 
         # create a shell instance, which won't have anything calculated
         instance = klas(df, *args)
         
         # try getting an existing instance from the store
+        force_create = kwargs.get('force_create', False)
+        if force_create:
+            self._force_create = True
         cached = None
-        if not force_create:
+        if not force_create and not self._force_create:
             try:
                 cached = self.get(instance.hash)
             except EmptyShelfException:
@@ -143,12 +156,20 @@ class DfxStore(object):
             logger.debug("get_or_create() - Found %s", cached.hash)
             return cached
 
-        # we didn't get anything from the store, so we need to calculate
-        logger.debug("get_or_create() - Not found, created %s", instance.hash)
+        # we didn't get anything from the store or force_create is True, so we need to calculate
+        if force_create or self._force_create:
+            logger.debug("get_or_create() - Force create %s", instance.hash)
+        else:
+            logger.debug("get_or_create() - Not found, created %s", instance.hash)
         instance._ensure_calculated()
 
         # save to store then return it
         self.save(instance.hash, instance)
+
+        # if this call to method used force_create, unset the instance flag now that we are done
+        if force_create:
+            self._force_create = False
+
         return instance
 
     def _remove_df(self, x):

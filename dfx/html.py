@@ -17,7 +17,7 @@ class UrlMaker(object):
         return "<a href='{prefix:}/column/{col_name:}'>{col_name:}</a>".format(prefix=self._prefix, col_name = col_name)
 
     def row(self, row_index):
-        return "<a href='{prefix:}/column/{row_index:}'>{row_index:}</a>".format(prefix=self._prefix, row_index = row_index)
+        return "<a href='{prefix:}/row/{row_index:}'>{row_index:}</a>".format(prefix=self._prefix, row_index = row_index)
 
     def relationship(self, col_1_name, col_2_name):
         """Given two column names, generate the hyperlink to the relationship
@@ -30,7 +30,7 @@ class UrlMaker(object):
     def column_value(self, col_name, value):
         """Given a value in a specific column, generate a hyperlink to that page
         """
-        return "<a href='{prefix:}/column/{col_name:}/values/{value:}'>{value:}</a>".format(
+        return u"<a href='{prefix:}/column/{col_name:}/values/{value:}'>{value:}</a>".format(
             prefix=self._prefix, 
             col_name = col_name,
             value = value,)
@@ -51,7 +51,8 @@ def df_to_html(df, urls):
     html.append("  <tbody>")
     for (i, row) in df.iterrows():
         html.append("    <tr>")
-        html.append("      <td><a href='/row/{row_num:}'>{row_num:}</a></td>".format(row_num=i))
+        row_text = urls.row(i)
+        html.append("      <td>{}</td>".format(row_text))
         for val in row:
             html.append("      <td>{}</td>".format(val))
         html.append("    </tr>")
@@ -134,8 +135,8 @@ def df_to_html_hierarchy(df, urls):
     html.append("  <tbody>")
     for (i, row) in df.iterrows():
         html.append("    <tr>")
-        html.append("      <td>{}</td>".format(urls.column_value(df.columns[0], row[0])))
-        html.append("      <td>{}</td>".format(urls.column_value(df.columns[1], row[1])))
+        html.append(u"      <td>{}</td>".format(urls.column_value(df.columns[0], row[0])))
+        html.append(u"      <td>{}</td>".format(urls.column_value(df.columns[1], row[1])))
         html.append("      <td>{}</td>".format(row[2]))
         html.append("    </tr>")
     html.append("  </tbody>")

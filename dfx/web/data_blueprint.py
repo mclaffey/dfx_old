@@ -14,9 +14,24 @@ data_bp = Blueprint('data', '__name__', url_prefix='/data/<data_name>')
 
 @data_bp.url_value_preprocessor
 def populate_data_df(endpoint, values):
+
+    # dataframe
     g._data_name = values.pop('data_name')
     import pandas as pd
-    g._dataframe = pd.read_pickle(df_pickle_path(g._data_name))
+    g.df = pd.read_pickle(df_pickle_path(g._data_name))
+
+    # data store
+    file_path = instance_path('dfx-web-store')
+    g.db = datastore.DfxStore(file_path)
+    # set it as the factory for all describers
+    describers.factory = g.db
+
+    # if refresh in URL params, put the db in force_create mode
+    if ('refresh' in request.args):
+        g.db._force_create = True
+
+    # tell describer which folder to save images in
+    describers._IMAGE_BASE_PATH = instance_path('images')
 
 def df_pickle_path(data_alias, sub_directory=""):
     return os.path.join(os.getcwd(), '.dfx_data', 'df', sub_directory, "{}.pickle".format(data_alias))
@@ -36,18 +51,18 @@ def url_for_data(data_method_name, **kwargs):
 	"""
 	return url_for("data." + data_method_name, data_name = g._data_name, **kwargs)
 
-def get_df():
-	return g._dataframe
+# def get_df():
+# 	return g._dataframe
 
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        file_path = instance_path('dfx-web-store')
-        db = g._database = datastore.DfxStore(file_path)
-        #db = g._database = describers.DescriberFactory()
-        # now that we have db, set it as the factory for all describers
-        describers.factory = db
-    return db
+# def get_db():
+#     db = getattr(g, '_database', None)
+#     if db is None:
+#         file_path = instance_path('dfx-web-store')
+#         db = g._database = datastore.DfxStore(file_path)
+#         #db = g._database = describers.DescriberFactory()
+#         # now that we have db, set it as the factory for all describers
+#         describers.factory = db
+#     return db
 
 def get_commands(df):
     """Generate the command list for the jQuery autocomplete
@@ -77,18 +92,18 @@ def set_describer_url_prefix(describer):
 
 @data_bp.route('/')
 def summary():
-    db = get_db()
-    df = get_df()
-    describer = db.get_or_create(describers.TablePageDescriber, df)
+    # db = get_db()
+    # df = get_df()
+    describer = g.db.get_or_create(describers.TablePageDescriber, g.df)
     set_describer_url_prefix(describer)
-    g.commands = get_commands(df)
+    g.commands = get_commands(g.df)
     return render_template('table.html',
         describer = describer,
         )
 
 @data_bp.route('/column/<string:col_name>')
 def column_page(col_name):
-    df = get_df()
+    df = g.df
     col_index = list(df.columns).index(col_name)
     #cols = get_columns()
     cols = {col: None for col in df.columns}
@@ -115,9 +130,7 @@ def column_page(col_name):
         next_col_hyperlink = next_col_hyperlink,
         )
 
-    db = get_db()
-    regenerate_describer = ('reload' in request.args)
-    describer = db.get_or_create(describers.ColumnPageDescriber, df, col_name, force_create=regenerate_describer)
+    describer = g.db.get_or_create(describers.ColumnPageDescriber, g.df, col_name)
     set_describer_url_prefix(describer)
     g.commands = get_commands(df)
 
@@ -130,11 +143,9 @@ def column_page(col_name):
 
 @data_bp.route('/row/<int:row_num>')
 def row_page(row_num):    
-    df = get_df()
-    db = get_db()
-    describer = db.get_or_create(describers.RowPageDescriber, df, row_num)
+    describer = g.db.get_or_create(describers.RowPageDescriber, g.df, row_num)
     set_describer_url_prefix(describer)
-    g.commands = get_commands(df)
+    g.commands = get_commands(g.df)
 
     return render_template('row.html', 
         describer = describer,
@@ -170,20 +181,15 @@ def column_modify():
 
 @data_bp.route('/column/<string:col_1_name>/relates-to/<string:col_2_name>')
 def relationship_page(col_1_name, col_2_name):
-    df = get_df()
-    g.commands = get_commands(df)
-    db = get_db()
-    force_create = ('refresh' in request.args)
-    describer = db.get_or_create(describers.RelationshipPageDescriber, df, col_1_name, col_2_name, force_create=force_create)
+    g.commands = get_commands(g.df)
+    describer = g.db.get_or_create(describers.RelationshipPageDescriber, g.df, col_1_name, col_2_name)
     set_describer_url_prefix(describer)
     return render_template('relationship.html', describer = describer)
 
 @data_bp.route('/column/<string:col_name>/values/<string:val>')
 def value_page(col_name, val):
-    df = get_df()
-    g.commands = get_commands(df)
-    db = get_db()
-    describer = db.get_or_create(describers.ValuePageDescriber, df, col_name, val)
+    g.commands = get_commands(g.df)
+    describer = g.db.get_or_create(describers.ValuePageDescriber, g.df, col_name, val)
     set_describer_url_prefix(describer)
     return render_template('value.html', describer = describer)
 
