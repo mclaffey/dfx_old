@@ -7,14 +7,15 @@ from flask import Flask, redirect, session, url_for, render_template, request, g
 
 # from dfx
 from .data_blueprint import data_bp, df_pickle_path
+from .annotate import annotate_bp
 
 # #################################################################
-# Data Blueprint
-
+# App setup
 
 app = Flask(__name__, instance_relative_config=True)
 app.secret_key = '1>k\x07\xf7\xe6\xeflO\x9e\x80\x9c\xc7qp\xef\xed2\xfc9$\x10\xbbr'
 app.register_blueprint(data_bp)
+app.register_blueprint(annotate_bp)
 
 # #################################################################
 # helpers
@@ -155,6 +156,13 @@ def load_file():
     df.to_pickle(df_path)
 
     return redirect(url_for('data.summary', data_name = data_alias))
+
+# ########################################################################
+# Image serving
+
+@app.route('/images/<path:path>')
+def serve_image(path):
+    return send_from_directory(instance_path('images'), path)
 
 
 

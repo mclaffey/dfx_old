@@ -17,7 +17,7 @@ class UrlMaker(object):
         return "<a href='{prefix:}/column/{col_name:}'>{col_name:}</a>".format(prefix=self._prefix, col_name = col_name)
 
     def row(self, row_index):
-        return "<a href='{prefix:}/column/{row_index:}'>{row_index:}</a>".format(prefix=self._prefix, row_index = row_index)
+        return "<a href='{prefix:}/row/{row_index:}'>{row_index:}</a>".format(prefix=self._prefix, row_index = row_index)
 
     def relationship(self, col_1_name, col_2_name):
         """Given two column names, generate the hyperlink to the relationship
@@ -51,7 +51,8 @@ def df_to_html(df, urls):
     html.append("  <tbody>")
     for (i, row) in df.iterrows():
         html.append("    <tr>")
-        html.append("      <td><a href='/row/{row_num:}'>{row_num:}</a></td>".format(row_num=i))
+        row_text = urls.row(i)
+        html.append("      <td>{}</td>".format(row_text))
         for val in row:
             html.append("      <td>{}</td>".format(val))
         html.append("    </tr>")

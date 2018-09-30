@@ -1,25 +1,36 @@
-<ul>
-  {% for desc in d._descriptions %}
-  <li>{{ desc }}</li>
-  {% endfor %}
-</ul>
+<div class="dfx-blurb">
+	<h2>{{d.col_name}} - Descriptions</h2>
 
-<h2>Relationships</h2>
-
-{% if d.relationships %}
 	<ul>
-	  {% for rel in d.relationships %}
-	  <li>{{ rel[0] }} - {{ rel[1] }}</li>
+	  {% for desc in d._descriptions %}
+	  <li>{{ desc }}</li>
 	  {% endfor %}
 	</ul>
-{% else %}
-	<p>No relationships</p>
-{% endif %}
+</div>
 
-<h2>Value counts</h2>
+<div class="dfx-blurb">
+	<h2>{{d.col_name}} - Most common values</h2>
 
-{{ d._unique_values_df_html }}
+	{{ d._unique_values_df_html }}
+</div>
 
-<h2>Sample rows</h2>
+<div class="dfx-blurb">
+	<h2>{{d.col_name}} - Sample rows</h2>
 
-{{ d._sample_df_html }}
+	{{ d._sample_df_html }}
+</div>
+
+<div class="dfx-blurb">
+	<h2>{{d.col_name}} - Relationships</h2>
+
+	{% if d.relationships %}
+		<ul>
+		  {% for rel in d.relationships %}
+		  <li>{{ rel[0] }} - {{ rel[1] }}</li>
+		  {% endfor %}
+		</ul>
+	{% else %}
+		<p>No relationships</p>
+	{% endif %}
+</div>
+

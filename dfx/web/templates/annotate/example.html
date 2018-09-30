@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block head %}
+	{{ super() }}
+    <link rel='stylesheet' href='/static/includes/annotate.css' >    
+	<script src='/static/includes/annotate.js'></script>
+	<script type="text/javascript">  $(function() {prepareBlurbs("", ".blurbable");} ); 	</script>
+{% endblock %}
+
+{% block content %}
+
+
+
+
+<h1>Example blurbable page</h1>
+
+<div id="section-1" class="blurbable">
+	<p>This is the first section, which doesn't contain any interesting information.</p>
+</div>
+
+<div class="blurbable">
+	<p>This contains the table</p>
+	<table>
+		<tr>
+			<th>ID</th>
+			<th>Value</th>
+		</tr>
+		<tr>
+			<td>1</td>
+			<td>hello</td>
+		</tr>
+		<tr>
+			<td>2</td>
+			<td>goodbye</td>
+		</tr>
+	</table>
+</div>
+
+<div class="blurbable">
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum congue orci, id ornare neque venenatis a. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Pellentesque rhoncus aliquam dignissim. Mauris tortor dui, sodales sagittis dignissim eget, dignissim et urna. Morbi non varius magna. Nullam in auctor sem. Aliquam sed sapien lacus. In dignissim arcu vitae vehicula vulputate.
+	</p>
+</div>
+	
+
+
+{% endblock %}

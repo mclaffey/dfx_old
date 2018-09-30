@@ -1,0 +1,26 @@
+	<div class="sub-blurb">
+		<form method="POST" action="/add-reference">
+			<input type="hidden" name="address" value="{{blurb.address}}" />
+			<input type="hidden" name="insert-index" value="{{i}}" />
+			<input name="new-reference" class="new-reference" placeholder="new reference" />
+		</form>
+
+		<div class="blurb-controls">
+			<a class="blurb-address sub-blurb-address" href="{{ url_for('annotate.view', address=ref.address ) }}?return_to={{blurb.address}}">{{ref.address}}</a>
+			<form class="inline" method="POST" action="/move-reference">
+				<input type="hidden" name="parent-address" value="{{blurb.address}}" />
+				<input type="hidden" name="ref-address-to-move" value="{{ref.address}}" />
+				<input name="move-to-index" class="sub-blurb-index" value="{{i+1}}" size="1" />
+			</form>
+			<form class="inline" 	method="POST" action="/remove-reference">
+				<span class="blurb-command remove-reference" tabindex="0">X</span>
+				<input type="hidden" name="parent-address" value="{{blurb.address}}" />
+				<input type="hidden" name="ref-address-to-delete" value="{{ref.address}}" />
+			</form>
+		</div>
+		<div class="blurb-content-holder">
+			<div class="blurb-content-display">
+				{{ ref.content |safe }}
+			</div>
+		</div>
+	</div>

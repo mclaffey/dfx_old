@@ -2,3 +2,4 @@ include dfx/templates/*
 include dfx/web/templates/*
 include dfx/web/static/*
 include dfx/web/static/includes/*
+include samples/*

@@ -1,0 +1,231 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
+blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em,
+img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i,
+center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption,
+tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,  menu, nav, output, ruby, section,
+summary, time, mark, audio, video
+{
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,  footer, header, hgroup, menu, nav, section
+{
+	display: block;
+}
+
+body {
+	line-height:	1;
+	margin-left: 	20px;
+	margin-right: 	20px;
+}
+
+ol, ul {
+	list-style: none;
+}
+
+blockquote, q {
+	quotes: none;
+}
+
+blockquote:before, blockquote:after, q:before, q:after
+{
+	content: '';
+	content: none;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+/* ----------------------------- standard HTML elements ----------------------- */
+
+html {
+	font-family: 		Helvetica, Arial, sans-serif;
+}
+
+body {
+	margin-bottom:      50px;
+	color:				rgb(100, 100, 100); /* gray */
+}
+
+h1 {
+	font-size: 			2em;
+	text-transform: 	uppercase;
+	margin-top: 		8px;
+	margin-bottom: 		15px;
+}
+
+h2 {
+	font-size: 			1.5em;
+	text-transform: 	uppercase;
+	margin-top: 		8px;
+	margin-bottom: 		8px;
+}
+
+h3 {
+	font-size: 			1.2em;
+	text-transform: 	uppercase;
+	margin-top: 		8px;
+	margin-bottom: 		8px;
+}
+
+p {
+	margin-top:			0.5em;
+	margin-bottom:		0.5em;
+}
+
+li {
+	margin-bottom: 		2px;
+	padding-left:       1.5em;
+}
+
+table th
+{
+	background-color: 	rgb(220, 220, 240);
+	padding:			4px;
+	border: 			1px solid black;
+}
+
+table td
+{
+	border: 			1px solid black;
+	padding: 			2px;
+}
+
+/* ----------------------------- blurbables ----------------------- */
+
+#blurb-message-holder {
+    position:			fixed; 					/* Sit on top of the page content */
+    top: 				10px; 
+    right: 				10px;
+    background-color: 	rgba(200,200,200,0.5); 	/* Light background with opacity */
+    z-index: 			2; 						/* Specify a stack order in case you're using a different order for other elements */
+    cursor: 			pointer; 				/* Add a pointer on hover */
+	min-width:			200px;
+}
+
+.blurb-message {
+	padding: 			8px;
+}
+
+
+.blurbable {
+	/* border: 1px solid gray; */
+	min-height:			30px; /* enough room for blurb-button */
+}
+
+.blurbable-hover {
+	background: lightGray;
+}
+
+
+.blurb-button
+{
+	float: 			right;
+	border: 		1px solid gray;
+	margin-right:	20px;
+	padding: 		4px;
+}
+
+.blurb-button:hover
+{
+	background: 	gray;
+	color: 			white;
+}
+
+/* ----------------------------- blurb home ----------------------- */
+
+.blurb-preview {
+	border:			1px solid WhiteSmoke;
+	margin:			4px;
+	padding: 		4px;
+}
+
+.blurb-preview a {
+	color:			lightGray;
+}
+
+/* ----------------------------- blurb page ----------------------- */
+
+.blurb-controls {
+	float:			right;
+}
+
+.blurb-address {
+	min-height:		1em;
+	font-style:  	italic;
+	color:			lightGray;
+	font-size:  	1em;
+}
+
+.blurb-address form input {
+	border:			none;
+	font-style:  	italic;
+	color:			lightGray;
+	font-size:  	1em;
+}
+
+.blurb-address form input:focus {
+	color:			black;
+}
+
+.blurb-content-holder {
+	margin:			20px;
+	padding:		5px;
+}
+
+.blurb-content-display {
+	
+}
+
+.sub-blurb {
+	margin-left: 		20px;				/* indent from main */
+	margin-bottom:		4px;
+	overflow:			auto;				/* big enough to include blurb-control */
+	border:				1px solid transparent; /* reserve room for when it gets selected */
+
+
+}
+
+.selected-blurb {
+	border:				1px solid lightGray;
+	background-color:	whiteSmoke;
+}
+
+.blurb-content-edit {
+	display:		None;
+}
+
+.blurb-content-edit textarea {
+	width:			100%;
+}
+
+.inline {
+	display: inline;
+}
+
+/* ----------------------------- unneeded? ----------------------- 
+
+
+button {
+  display: none; /* Hide button *
+}
+
+.divbutton:hover button {
+   display: block; /* On :hover of div show button *
+}
+
+*/

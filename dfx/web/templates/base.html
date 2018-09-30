@@ -3,12 +3,19 @@
 <html lang="en">
 <head>
     {% block head %}
-    <link rel='stylesheet' href='/static/includes/style-1.css' >
     <link rel='stylesheet' href='/static/includes/jquery-ui-1.12.1.min.css' >    
+    <link rel='stylesheet' href='/static/includes/annotate.css' >
+    <link rel='stylesheet' href='/static/includes/style-1.css' >
     <script src='/static/includes/jquery-3.2.1.min.js'></script>
     <script src='/static/includes/jquery-ui-1.12.1.min.js'></script>
+    <script src='/static/includes/annotate.js'></script>
     <title>{% block title %}{% endblock %}</title>
     {% block additional_head_lines %}{% endblock %}
+    <script>
+      $(function() { prepareBlurbs("", ".dfx-blurb"); });
+    </script>
+
+
     {% endblock %}
 
     <script>
@@ -38,7 +45,11 @@
         */
 
       $( function() {
+          {% if g.commands %}
           var commands =  {{ g.commands | safe }} ;
+          {% else %}
+          var commands =  [];
+          {% endif %}
           $( "#command-input" ).autocomplete({
             source: commands,
             minLength: 0,
@@ -54,6 +65,7 @@
             }
           });
         } );
+
     </script>
 
 </head>

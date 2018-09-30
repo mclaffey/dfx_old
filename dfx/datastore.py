@@ -14,7 +14,7 @@ class DfxStore(object):
     -- get_or_create
 
         Takes a class and instantiation arguments. If it has a saved object matching
-        those, it returns that object. If it does not havea  saved object, it instantiates
+        those, it returns that object. If it does not have a saved object, it instantiates
         the object and returns that.
 
         The point is that rather than the calling code creating the object, it passes
@@ -38,6 +38,16 @@ class DfxStore(object):
                 raise ValueError("No file exists for path", file_path)
 
         self._file_path = file_path
+
+        """Force refresh is for generating a describer from scratch, even if it already
+        exists in the data store.
+
+        There is both this instance flag below, as well as a force_refresh argument that is
+        passed to .get_or_create(). The user initiates a force refresh using the argument
+        to .get_for_create(), but that method will then set the below flag to True, so that
+        all additional describers required by the first decriber will also be regenerated.
+        """
+        self._force_create = False
 
     def _get_shelf(self, flag=None):
         """Create a connection to shelf
@@ -90,11 +100,11 @@ class DfxStore(object):
             return False
 
         # if shelf existed, check keys
-        return index in s.keys()
+        return index in list(s.keys())
 
     def keys(self):
         s = self._get_shelf(flag='r')
-        return s.keys()
+        return list(s.keys())
 
     def save(self, index, value):
         """Save an object, removing dataframe if applicable
@@ -115,34 +125,51 @@ class DfxStore(object):
             value.df = df
 
 
-    def get_or_create(self, klas, df, *args):
+    def get_or_create(self, klas, df, *args, **kwargs):
         """Given a class and instantiation arguments, returns a saved instance if one
         matches, or creates a new one if a saved instances does not exist.
 
+        If force_create is True, will create new instance and save to data store,
+        ignoring any instance already in data store.
+
         """
+        logger.debug("get_or_create() Start: {} / {} / {}".format(klas.__name__, args, kwargs))
+
         # create a shell instance, which won't have anything calculated
         instance = klas(df, *args)
         
         # try getting an existing instance from the store
+        force_create = kwargs.get('force_create', False)
+        if force_create:
+            self._force_create = True
         cached = None
-        try:
-            cached = self.get(instance.hash)
-        except EmptyShelfException:
-            pass
-        except KeyError:
-            pass
+        if not force_create and not self._force_create:
+            try:
+                cached = self.get(instance.hash)
+            except EmptyShelfException:
+                pass
+            except KeyError:
+                pass
 
         # if an instance existed in the store, run with that
         if cached is not None:
             logger.debug("get_or_create() - Found %s", cached.hash)
             return cached
 
-        # we didn't get anything from the store, so we need to calculate
-        logger.debug("get_or_create() - Not found, created %s", instance.hash)
+        # we didn't get anything from the store or force_create is True, so we need to calculate
+        if force_create or self._force_create:
+            logger.debug("get_or_create() - Force create %s", instance.hash)
+        else:
+            logger.debug("get_or_create() - Not found, created %s", instance.hash)
         instance._ensure_calculated()
 
         # save to store then return it
         self.save(instance.hash, instance)
+
+        # if this call to method used force_create, unset the instance flag now that we are done
+        if force_create:
+            self._force_create = False
+
         return instance
 
     def _remove_df(self, x):
@@ -174,7 +201,7 @@ class DfxStore(object):
         # get df from store, add to object
         x.df = self.get(x._hash_df)
 
-class EmptyShelfException(StandardError):
+class EmptyShelfException(Exception):
     pass
 
 
