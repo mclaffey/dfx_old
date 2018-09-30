@@ -377,7 +377,7 @@ class ColumnId(ColumnDescriber):
                 return True
             if other_describer.__class__ == ColumnUnique:
                 return True
-        except StandardError:
+        except Exception:
             return False
 
         return False
@@ -392,7 +392,7 @@ class ColumnText(ColumnDescriber):
 
     def _calculate(self):
         col = self.df[self.col_name]
-        non_str_types = [str(val_type) for val_type in list(col.apply(type).unique()) if val_type not in [str, unicode]]
+        non_str_types = [str(val_type) for val_type in list(col.apply(type).unique()) if val_type not in [str, str]]
         if non_str_types:
             self._description = "Non string types: {}".format(", ".join(non_str_types))
             self._state = State.UNQUALIFIED
@@ -464,7 +464,7 @@ class ColumnNumeric(ColumnDescriber):
                 <p>{}</p>
                 <img src="{}">
                 """.format(self._description, image_url)
-        except StandardError as e:
+        except Exception as e:
             self._html = """
                 <p>{}</p>
                 <pre>{}</pre>
@@ -614,7 +614,7 @@ class RelationshipAnova(RelationshipDescriber):
         from scipy import stats
         try:
             self.f, self.p = stats.f_oneway(*group_values)
-        except StandardError as e:
+        except Exception as e:
             self._description = e[0]
             self._state = State.INVALID
             return
@@ -641,7 +641,7 @@ class RelationshipCorrelation(RelationshipDescriber):
     """Both columns must be numeric
     """
     _qualified_dfs = [
-        ('linear increase', pd.DataFrame(dict(x=range(10, 15), y=range(20, 25)))),
+        ('linear increase', pd.DataFrame(dict(x=list(range(10, 15)), y=list(range(20, 25))))),
         ]
     _unqualified_dfs = [
         ('random', pd.DataFrame(dict(x=[1, 5, 2, 4, 3], y=[1, 2, 3, 4, 5]))),
@@ -666,7 +666,7 @@ class RelationshipCorrelation(RelationshipDescriber):
         from scipy import stats
         try:
             self.r, self.p = stats.pearsonr(x, y)
-        except StandardError as e:
+        except Exception as e:
             self._description = e[0]
             self._state = State.INVALID
             return
@@ -751,7 +751,7 @@ class RelationshipPageDescriber(RelationshipDescriber):
     """
     _qualified_dfs = [
         ('different means', pd.DataFrame(dict(group=['a', 'a', 'a', 'b', 'b', 'b'], val=[10, 20, 30, 100, 110, 120]))),
-        ('linear increase', pd.DataFrame(dict(x=range(10, 15), y=range(20, 25)))),
+        ('linear increase', pd.DataFrame(dict(x=list(range(10, 15)), y=list(range(20, 25))))),
         ('one to many', pd.DataFrame(dict(region = ['west', 'west', 'east', 'east'], state = ['CA', 'WA', 'NC', 'NY']))),
         ('one to one', pd.DataFrame(dict(x = [1, 2, 3, 4], y = [10, 11, 12, 13]))),
         ]
@@ -892,7 +892,7 @@ def is_numeric(col):
     return np.issubdtype(col.dtype, np.number)
 
 def is_text(col):
-    non_str_types = [val_type for val_type in list(col.apply(type).unique()) if val_type not in [str, unicode]]
+    non_str_types = [val_type for val_type in list(col.apply(type).unique()) if val_type not in [str, str]]
     return not non_str_types
 
 def get_df_hash(df):

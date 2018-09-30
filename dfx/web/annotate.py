@@ -317,7 +317,7 @@ class BlurbStore(object):
 		s = shelve.open(self.path, flag='c')
 		del s[address]
 		if delete_references:
-			for blurb in s.values():
+			for blurb in list(s.values()):
 				need_to_save = False
 				while True:
 					try:
@@ -333,14 +333,14 @@ class BlurbStore(object):
 		"""Return a list of all keys
 		"""
 		s = shelve.open(self.path, flag='r')
-		return s.keys()
+		return list(s.keys())
 
 	def previews(self):
 		"""Return a list of (address, content)
 		"""
 		s = shelve.open(self.path, flag='r')
 		previews = []
-		keys = s.keys()
+		keys = list(s.keys())
 		for key in keys:
 			blurb = s[key]
 			previews.append((key, blurb.content))

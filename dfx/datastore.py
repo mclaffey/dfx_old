@@ -100,11 +100,11 @@ class DfxStore(object):
             return False
 
         # if shelf existed, check keys
-        return index in s.keys()
+        return index in list(s.keys())
 
     def keys(self):
         s = self._get_shelf(flag='r')
-        return s.keys()
+        return list(s.keys())
 
     def save(self, index, value):
         """Save an object, removing dataframe if applicable
@@ -201,7 +201,7 @@ class DfxStore(object):
         # get df from store, add to object
         x.df = self.get(x._hash_df)
 
-class EmptyShelfException(StandardError):
+class EmptyShelfException(Exception):
     pass
 
 

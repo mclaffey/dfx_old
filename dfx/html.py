@@ -30,7 +30,7 @@ class UrlMaker(object):
     def column_value(self, col_name, value):
         """Given a value in a specific column, generate a hyperlink to that page
         """
-        return u"<a href='{prefix:}/column/{col_name:}/values/{value:}'>{value:}</a>".format(
+        return "<a href='{prefix:}/column/{col_name:}/values/{value:}'>{value:}</a>".format(
             prefix=self._prefix, 
             col_name = col_name,
             value = value,)
@@ -135,8 +135,8 @@ def df_to_html_hierarchy(df, urls):
     html.append("  <tbody>")
     for (i, row) in df.iterrows():
         html.append("    <tr>")
-        html.append(u"      <td>{}</td>".format(urls.column_value(df.columns[0], row[0])))
-        html.append(u"      <td>{}</td>".format(urls.column_value(df.columns[1], row[1])))
+        html.append("      <td>{}</td>".format(urls.column_value(df.columns[0], row[0])))
+        html.append("      <td>{}</td>".format(urls.column_value(df.columns[1], row[1])))
         html.append("      <td>{}</td>".format(row[2]))
         html.append("    </tr>")
     html.append("  </tbody>")
